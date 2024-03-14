@@ -22,10 +22,15 @@ class CustomTSVParser(BaseTSVParser):
     def endwhen(self):
         self.condition_met = True
 
-    def chara(self, name: str):
+    def chara(self, name: str, action: str = "", position: str = ""):
         # TODO: This will show the character on screen
         if self.condition_met:
-            return f"Character {name.title()} shown"
+            message = f"{name.title()} appears on the screen"
+            if action:
+                message += f", visibly {action}"
+            if position:
+                message += f", positioned on the {position} side"
+            return message
 
 
 if __name__ == "__main__":

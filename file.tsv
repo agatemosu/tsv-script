@@ -1,6 +1,6 @@
 ID	Code	Name	EN	ES
 	when:True			
-	chara:nikola			
+	chara:nikola:angry			
 		Nikola	Hello1	Hola1
 	endwhen			
 
@@ -9,5 +9,5 @@ ID	Code	Name	EN	ES
 		Roger	Hello2	Hola2
 	endwhen			
 
-	chara:alva			
+	chara:alva::left			
 		Alva	Hello3	Hola3
