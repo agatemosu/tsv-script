@@ -30,7 +30,6 @@ class CustomTSVParser(BaseTSVParser):
         self.condition_met = True
 
     def chara(self, name: str, action: str = "", position: str = ""):
-        # TODO: This will show the character on screen
         if not self.condition_met:
             return
 
