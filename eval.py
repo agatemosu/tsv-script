@@ -25,13 +25,15 @@ class CustomTSVParser(BaseTSVParser):
 
     def chara(self, name: str, action: str = "", position: str = ""):
         # TODO: This will show the character on screen
-        if self.condition_met:
-            message = f"{name.title()} appears on the screen"
-            if action:
-                message += f", visibly {action}"
-            if position:
-                message += f", positioned on the {position} side"
-            return message
+        if not self.condition_met:
+            return
+
+        message = f"{name.title()} appears on the screen"
+        if action:
+            message += f", visibly {action}"
+        if position:
+            message += f", positioned on the {position} side"
+        return message
 
 
 if __name__ == "__main__":
