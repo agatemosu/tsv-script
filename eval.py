@@ -15,6 +15,7 @@ class BaseTSVParser:
 class CustomTSVParser(BaseTSVParser):
     def __init__(self):
         self.condition_met = True
+        self.idx = 0
 
     # This is like a "if" in Python
     def when(self, condition: str):
@@ -33,7 +34,16 @@ class CustomTSVParser(BaseTSVParser):
             message += f", visibly {action}"
         if position:
             message += f", positioned on the {position} side"
-        return message
+        print(message)
+
+    def go_to(self, line_id: str):
+        if not self.condition_met:
+            return
+
+        for index, sublist in enumerate(tokenized_rows):
+            if sublist[id_column] == line_id:
+                self.idx = index - 1
+                break
 
 
 if __name__ == "__main__":
@@ -54,8 +64,8 @@ if __name__ == "__main__":
     print("Code column index:", code_column)
     print()
 
-    for tokenized_row in tokenized_rows:
-        code_value = tokenized_row[code_column]
+    while tsv.idx < len(tokenized_rows):
+        code_value = tokenized_rows[tsv.idx][code_column]
 
         # Example of a function:
         #   func:arg1:arg2:arg3
@@ -69,6 +79,8 @@ if __name__ == "__main__":
             function = getattr(tsv, function_name)
             result = function(*arguments)
 
-        if tsv.condition_met and tokenized_row[lang_column]:
-            print(tokenized_row[lang_column])
+        if tsv.condition_met and tokenized_rows[tsv.idx][lang_column]:
+            print(tokenized_rows[tsv.idx][lang_column])
             time.sleep(1)
+
+        tsv.idx += 1

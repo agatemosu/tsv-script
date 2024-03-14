@@ -5,9 +5,12 @@ ID	Code	Name	EN	ES
 	endwhen			
 				
 	when:False			
-	chara:roger			
+roger_in	chara:roger			
 		Roger	Hello2	Hola2
+	go_to:alva_in			
 	endwhen			
 				
-	chara:alva::left			
+	go_to:roger_in			
+				
+alva_in	chara:alva::left			
 		Alva	Hello3	Hola3
