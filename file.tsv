@@ -3,11 +3,11 @@ ID	Code	Name	EN	ES
 	chara:nikola:angry			
 		Nikola	Hello1	Hola1
 	endwhen			
-
+				
 	when:False			
 	chara:roger			
 		Roger	Hello2	Hola2
 	endwhen			
-
+				
 	chara:alva::left			
 		Alva	Hello3	Hola3
