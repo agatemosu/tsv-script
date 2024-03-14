@@ -16,6 +16,11 @@ class CustomTSVParser(BaseTSVParser):
     def __init__(self):
         self.condition_met = True
         self.idx = 0
+        self.id_to_index = {}
+
+    def enable_go_to(self):
+        for index, row in enumerate(tokenized_rows):
+            self.id_to_index[row[id_column]] = index
 
     # This is like a "if" in Python
     def when(self, condition: str):
@@ -40,10 +45,7 @@ class CustomTSVParser(BaseTSVParser):
         if not self.condition_met:
             return
 
-        for index, sublist in enumerate(tokenized_rows):
-            if sublist[id_column] == line_id:
-                self.idx = index - 1
-                break
+        self.idx = self.id_to_index[line_id] - 1
 
 
 if __name__ == "__main__":
@@ -59,6 +61,8 @@ if __name__ == "__main__":
     id_column = tokenized_rows[0].index("ID")
     code_column = tokenized_rows[0].index("Code")
     lang_column = tokenized_rows[0].index("EN")
+
+    tsv.enable_go_to()
 
     print("ID column index:", id_column)
     print("Code column index:", code_column)
