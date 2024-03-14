@@ -1,4 +1,5 @@
 import csv
+import time
 
 
 class BaseTSVParser:
@@ -45,6 +46,7 @@ if __name__ == "__main__":
 
     id_column = tokenized_rows[0].index("ID")
     code_column = tokenized_rows[0].index("Code")
+    lang_column = tokenized_rows[0].index("EN")
 
     print("ID column index:", id_column)
     print("Code column index:", code_column)
@@ -65,5 +67,6 @@ if __name__ == "__main__":
             function = getattr(tsv, function_name)
             result = function(*arguments)
 
-        if tsv.condition_met:
-            print(tokenized_row)
+        if tsv.condition_met and tokenized_row[lang_column]:
+            print(tokenized_row[lang_column])
+            time.sleep(1)
