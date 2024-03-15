@@ -15,6 +15,7 @@ class BaseTSVParser:
 class CustomTSVParser(BaseTSVParser):
     def __init__(self):
         self.when_stack = []
+        self.until_stack = []
         self.idx = 0
         self.id_to_index = {}
 
@@ -29,6 +30,23 @@ class CustomTSVParser(BaseTSVParser):
     def endwhen(self):
         if self.when_stack:
             self.when_stack.pop()
+
+    # This is like a "do-while" in C
+    def until(self, condition: str):
+        if not all(self.when_stack):
+            return
+
+        self.until_stack.append((condition, self.idx))
+
+    def enduntil(self):
+        if not all(self.when_stack):
+            return
+
+        condition, index = self.until_stack[-1]
+        if eval(condition):
+            self.until_stack.pop()
+        else:
+            self.idx = index
 
     def chara(self, name: str, action: str = "", position: str = ""):
         if not all(self.when_stack):

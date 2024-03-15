@@ -1,4 +1,7 @@
 ID	Code	Name	EN
+	until:self.idx>1		
+		Narrator	Here in the class...
+	enduntil		
 	when:True		
 	chara:nikola:angry		
 		Nikola	Hello Roger
@@ -14,3 +17,10 @@ roger_in	chara:roger
 			
 alva_in	chara:alva::left		
 		Alva	Hello Roger and Nikola
+			
+	when:False		
+	until:True		
+		Narrator	They are all on the class
+	enduntil		
+	endwhen		
+		Narrator	One hour later, they left
