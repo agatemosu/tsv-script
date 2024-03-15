@@ -82,8 +82,10 @@ if __name__ == "__main__":
             function = getattr(tsv, function_name)
             result = function(*arguments)
 
-        if tsv.condition_met and tokenized_rows[tsv.idx][lang_column]:
-            print(tokenized_rows[tsv.idx][lang_column])
-            time.sleep(1)
+        if tsv.condition_met:
+            if tokenized_rows[tsv.idx][lang_column]:
+                print(tokenized_rows[tsv.idx][lang_column])
+
+            time.sleep(0.5)
 
         tsv.idx += 1
