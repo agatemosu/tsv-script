@@ -14,7 +14,7 @@ class BaseTSVParser:
 
 class CustomTSVParser(BaseTSVParser):
     def __init__(self):
-        self.condition_met = True
+        self.when_stack = []
         self.idx = 0
         self.id_to_index = {}
 
@@ -24,13 +24,14 @@ class CustomTSVParser(BaseTSVParser):
 
     # This is like a "if" in Python
     def when(self, condition: str):
-        self.condition_met = eval(condition)
+        self.when_stack.append(eval(condition))
 
     def endwhen(self):
-        self.condition_met = True
+        if self.when_stack:
+            self.when_stack.pop()
 
     def chara(self, name: str, action: str = "", position: str = ""):
-        if not self.condition_met:
+        if not all(self.when_stack):
             return
 
         message = f"{name.title()} appears on the screen"
@@ -41,7 +42,7 @@ class CustomTSVParser(BaseTSVParser):
         print(message)
 
     def go_to(self, line_id: str):
-        if not self.condition_met:
+        if not all(self.when_stack):
             return
 
         self.idx = self.id_to_index[line_id] - 1
@@ -84,7 +85,7 @@ if __name__ == "__main__":
             function = getattr(tsv, function_name)
             function(*arguments)
 
-        if tsv.condition_met:
+        if all(tsv.when_stack):
             if tokenized_rows[tsv.idx][lang_column]:
                 print(
                     tokenized_rows[tsv.idx][name_column],
