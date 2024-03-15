@@ -22,7 +22,7 @@ class CustomTSVParser(BaseTSVParser):
         for index, row in enumerate(tokenized_rows):
             self.id_to_index[row[id_column]] = index
 
-    # This is like a "if" in Python
+    # This is like an "if" in Python
     def when(self, condition: str):
         self.when_stack.append(eval(condition))
 
@@ -56,22 +56,22 @@ if __name__ == "__main__":
     with open("file.tsv", encoding="utf-8") as f:
         content = f.read()
 
-    tokenized_rows = tsv.parse(content)
+    rows = tsv.parse(content)
 
-    id_column = tokenized_rows[0].index("ID")
-    code_column = tokenized_rows[0].index("Code")
-    name_column = tokenized_rows[0].index("Name")
-    lang_column = tokenized_rows[0].index("EN")
+    id_column = rows[0].index("ID")
+    code_column = rows[0].index("Code")
+    name_column = rows[0].index("Name")
+    lang_column = rows[0].index("EN")
 
-    tsv.enable_go_to(tokenized_rows)
+    tsv.enable_go_to(rows)
 
     print("ID column index:", id_column)
     print("Code column index:", code_column)
     print("Name column index:", name_column)
     print()
 
-    while tsv.idx < len(tokenized_rows):
-        code_value = tokenized_rows[tsv.idx][code_column]
+    while tsv.idx < len(rows):
+        code_value = rows[tsv.idx][code_column]
 
         # Example of a function:
         #   func:arg1:arg2:arg3
@@ -86,11 +86,11 @@ if __name__ == "__main__":
             function(*arguments)
 
         if all(tsv.when_stack):
-            if tokenized_rows[tsv.idx][lang_column]:
+            if rows[tsv.idx][lang_column]:
                 print(
-                    tokenized_rows[tsv.idx][name_column],
+                    rows[tsv.idx][name_column],
                     "says:",
-                    tokenized_rows[tsv.idx][lang_column],
+                    rows[tsv.idx][lang_column],
                 )
 
             time.sleep(0.5)
