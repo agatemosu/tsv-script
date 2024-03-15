@@ -1,16 +1,16 @@
-ID	Code	Name	EN	ES
-	when:True			
-	chara:nikola:angry			
-		Nikola	Hello1	Hola1
-	endwhen			
-				
-	when:False			
-roger_in	chara:roger			
-		Roger	Hello2	Hola2
-	go_to:alva_in			
-	endwhen			
-				
-	go_to:roger_in			
-				
-alva_in	chara:alva::left			
-		Alva	Hello3	Hola3
+ID	Code	Name	EN
+	when:True		
+	chara:nikola:angry		
+		Nikola	Hello Roger
+	endwhen		
+			
+	when:False		
+roger_in	chara:roger		
+		Roger	Hello Nikola
+	go_to:alva_in		
+	endwhen		
+			
+	go_to:roger_in		
+			
+alva_in	chara:alva::left		
+		Alva	Hello Roger and Nikola
