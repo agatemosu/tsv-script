@@ -18,7 +18,7 @@ class CustomTSVParser(BaseTSVParser):
         self.idx = 0
         self.id_to_index = {}
 
-    def enable_go_to(self):
+    def enable_go_to(self, tokenized_rows: list[list[str]]):
         for index, row in enumerate(tokenized_rows):
             self.id_to_index[row[id_column]] = index
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     code_column = tokenized_rows[0].index("Code")
     lang_column = tokenized_rows[0].index("EN")
 
-    tsv.enable_go_to()
+    tsv.enable_go_to(tokenized_rows)
 
     print("ID column index:", id_column)
     print("Code column index:", code_column)
