@@ -59,12 +59,14 @@ if __name__ == "__main__":
 
     id_column = tokenized_rows[0].index("ID")
     code_column = tokenized_rows[0].index("Code")
+    name_column = tokenized_rows[0].index("Name")
     lang_column = tokenized_rows[0].index("EN")
 
     tsv.enable_go_to(tokenized_rows)
 
     print("ID column index:", id_column)
     print("Code column index:", code_column)
+    print("Name column index:", name_column)
     print()
 
     while tsv.idx < len(tokenized_rows):
@@ -84,7 +86,11 @@ if __name__ == "__main__":
 
         if tsv.condition_met:
             if tokenized_rows[tsv.idx][lang_column]:
-                print(tokenized_rows[tsv.idx][lang_column])
+                print(
+                    tokenized_rows[tsv.idx][name_column],
+                    "says:",
+                    tokenized_rows[tsv.idx][lang_column],
+                )
 
             time.sleep(0.5)
 
