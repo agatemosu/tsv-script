@@ -80,7 +80,7 @@ if __name__ == "__main__":
         # Check if function exists in tsv object
         if hasattr(tsv, function_name):
             function = getattr(tsv, function_name)
-            result = function(*arguments)
+            function(*arguments)
 
         if tsv.condition_met:
             if tokenized_rows[tsv.idx][lang_column]:
