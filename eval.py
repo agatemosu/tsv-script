@@ -1,14 +1,30 @@
 import csv
+import re
 import time
 
 
 def parse(tsvfile: str) -> list[list[str]]:
-    tokenized_rows = []
     reader = csv.reader(tsvfile.splitlines(), delimiter="\t")
+
+    tokenized_rows = []
     for tokenized_row in reader:
         if any(tokenized_row):
             tokenized_rows.append(tokenized_row)
+
     return tokenized_rows
+
+
+def replace_variables_wrapper(func):
+    def wrapper(self, *args):
+        replaced_args = []
+        for arg in args:
+            if "$" in arg:
+                arg = self._replace_variables(arg)
+            replaced_args.append(arg)
+
+        return func(self, *replaced_args)
+
+    return wrapper
 
 
 class TSVExecuter:
@@ -17,11 +33,21 @@ class TSVExecuter:
         self.until_stack = []
         self.idx = 1
         self.id_to_index = {}
+        self.variables = {}
 
         for index, tokenized_row in enumerate(tokenized_rows):
             self.id_to_index[tokenized_row[id_column]] = index
 
+    def _replace_variables(self, argument: str):
+        variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
+
+        for variable in variables:
+            argument = argument.replace(f"${variable}", str(self.variables[variable]))
+
+        return argument
+
     # This is like an "if" in Python
+    @replace_variables_wrapper
     def when(self, condition: str):
         self.when_stack.append(eval(condition))
 
@@ -41,17 +67,33 @@ class TSVExecuter:
             return
 
         condition, index = self.until_stack[-1]
+        condition = self._replace_variables(condition)
+
         if eval(condition):
             self.until_stack.pop()
         else:
             self.idx = index
 
-    def log(self, content: str = ""):
+    def var(self, name: str, value: str):
         if not all(self.when_stack):
             return
 
-        print(content)
+        if "$" in value:
+            value = self._replace_variables(value)
 
+        self.variables[name] = eval(value)
+
+    @replace_variables_wrapper
+    def log(self, *args):
+        if not all(self.when_stack):
+            return
+
+        for arg in args:
+            print(arg, end=" ")
+
+        print()
+
+    @replace_variables_wrapper
     def chara(self, name: str, action: str = None, position: str = None):
         if not all(self.when_stack):
             return
@@ -63,6 +105,7 @@ class TSVExecuter:
             message += f", positioned on the {position} side"
         print(f"{message}.")
 
+    @replace_variables_wrapper
     def go_to(self, line_id: str):
         if not all(self.when_stack):
             return
@@ -97,6 +140,7 @@ if __name__ == "__main__":
         # Example of a function:
         #   func1:arg1:arg2:arg3
         #   func2:arg1::arg3
+        #   func3:arg1:$var
         #
         function_and_args = code_value.split(":")
         function_name = function_and_args[0].strip()

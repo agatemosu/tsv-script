@@ -1,8 +1,14 @@
 ID	Code	Name	EN
 	log:The history started		
-	until:self.idx>1		
+			
+	var:es:1		
+	until:self.idx<$es		
 		Narrator	Here in the class...
+			
+	var:es:$es + 4		
+	"log:Variable ""es"" is:$es"		
 	enduntil		
+			
 	when:True		
 	chara:nikola:angry		
 		Nikola	Hello Roger
