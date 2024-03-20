@@ -6,9 +6,9 @@ class BaseTSVParser:
     def parse(self, tsvfile: str) -> list[list[str]]:
         tokenized_rows = []
         reader = csv.reader(tsvfile.splitlines(), delimiter="\t")
-        for row in reader:
-            if any(row):
-                tokenized_rows.append(row)
+        for tokenized_row in reader:
+            if any(tokenized_row):
+                tokenized_rows.append(tokenized_row)
         return tokenized_rows
 
 
@@ -20,8 +20,8 @@ class CustomTSVParser(BaseTSVParser):
         self.id_to_index = {}
 
     def enable_go_to(self, tokenized_rows: list[list[str]], id_column: int):
-        for index, row in enumerate(tokenized_rows):
-            self.id_to_index[row[id_column]] = index
+        for index, tokenized_row in enumerate(tokenized_rows):
+            self.id_to_index[tokenized_row[id_column]] = index
 
     # This is like an "if" in Python
     def when(self, condition: str):
@@ -78,9 +78,9 @@ if __name__ == "__main__":
     tsv = CustomTSVParser()
 
     with open("file.tsv", encoding="utf-8") as f:
-        content = f.read()
+        file_content = f.read()
 
-    rows = tsv.parse(content)
+    rows = tsv.parse(file_content)
 
     id_col = rows[0].index("ID")
     code_col = rows[0].index("Code")
