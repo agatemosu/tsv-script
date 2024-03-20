@@ -19,7 +19,7 @@ class CustomTSVParser(BaseTSVParser):
         self.idx = 1
         self.id_to_index = {}
 
-    def enable_go_to(self, tokenized_rows: list[list[str]]):
+    def enable_go_to(self, tokenized_rows: list[list[str]], id_column: int):
         for index, row in enumerate(tokenized_rows):
             self.id_to_index[row[id_column]] = index
 
@@ -54,7 +54,7 @@ class CustomTSVParser(BaseTSVParser):
 
         print(content)
 
-    def chara(self, name: str, action: str = "", position: str = ""):
+    def chara(self, name: str, action: str = None, position: str = None):
         if not all(self.when_stack):
             return
 
@@ -82,23 +82,25 @@ if __name__ == "__main__":
 
     rows = tsv.parse(content)
 
-    id_column = rows[0].index("ID")
-    code_column = rows[0].index("Code")
-    name_column = rows[0].index("Name")
-    lang_column = rows[0].index("EN")
+    id_col = rows[0].index("ID")
+    code_col = rows[0].index("Code")
+    name_col = rows[0].index("Name")
+    text_col = rows[0].index("EN")
 
-    tsv.enable_go_to(rows)
+    tsv.enable_go_to(rows, id_col)
 
-    print("ID column index:", id_column)
-    print("Code column index:", code_column)
-    print("Name column index:", name_column)
+    print("ID column index:", id_col)
+    print("Code column index:", code_col)
+    print("Name column index:", name_col)
     print()
 
     while tsv.idx < len(rows):
-        code_value = rows[tsv.idx][code_column]
+        row = rows[tsv.idx]
+        code_value = row[code_col]
 
         # Example of a function:
-        #   func:arg1:arg2:arg3
+        #   func1:arg1:arg2:arg3
+        #   func2:arg1::arg3
         #
         function_and_args = code_value.split(":")
         function_name = function_and_args[0].strip()
@@ -110,12 +112,8 @@ if __name__ == "__main__":
             function(*arguments)
 
         if all(tsv.when_stack):
-            if rows[tsv.idx][lang_column]:
-                print(
-                    rows[tsv.idx][name_column],
-                    "says:",
-                    rows[tsv.idx][lang_column],
-                )
+            if row[text_col]:
+                print(row[name_col], "says:", row[text_col])
 
             time.sleep(0.5)
 
