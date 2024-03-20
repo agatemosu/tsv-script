@@ -1,4 +1,5 @@
 ID	Code	Name	EN
+	log:The history started		
 	until:self.idx>1		
 		Narrator	Here in the class...
 	enduntil		
@@ -24,3 +25,4 @@ alva_in	chara:alva::left
 	enduntil		
 	endwhen		
 		Narrator	One hour later, they left
+	log:The history ended		

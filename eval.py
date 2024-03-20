@@ -48,6 +48,12 @@ class CustomTSVParser(BaseTSVParser):
         else:
             self.idx = index
 
+    def log(self, content: str = ""):
+        if not all(self.when_stack):
+            return
+
+        print(content)
+
     def chara(self, name: str, action: str = "", position: str = ""):
         if not all(self.when_stack):
             return
