@@ -16,7 +16,7 @@ class CustomTSVParser(BaseTSVParser):
     def __init__(self):
         self.when_stack = []
         self.until_stack = []
-        self.idx = 0
+        self.idx = 1
         self.id_to_index = {}
 
     def enable_go_to(self, tokenized_rows: list[list[str]]):
