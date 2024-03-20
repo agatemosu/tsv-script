@@ -7,7 +7,7 @@ class BaseTSVParser:
         tokenized_rows = []
         reader = csv.reader(tsvfile.splitlines(), delimiter="\t")
         for row in reader:
-            if row:
+            if any(row):
                 tokenized_rows.append(row)
         return tokenized_rows
 
