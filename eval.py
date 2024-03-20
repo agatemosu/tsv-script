@@ -2,24 +2,22 @@ import csv
 import time
 
 
-class BaseTSVParser:
-    def parse(self, tsvfile: str) -> list[list[str]]:
-        tokenized_rows = []
-        reader = csv.reader(tsvfile.splitlines(), delimiter="\t")
-        for tokenized_row in reader:
-            if any(tokenized_row):
-                tokenized_rows.append(tokenized_row)
-        return tokenized_rows
+def parse(tsvfile: str) -> list[list[str]]:
+    tokenized_rows = []
+    reader = csv.reader(tsvfile.splitlines(), delimiter="\t")
+    for tokenized_row in reader:
+        if any(tokenized_row):
+            tokenized_rows.append(tokenized_row)
+    return tokenized_rows
 
 
-class CustomTSVParser(BaseTSVParser):
-    def __init__(self):
+class TSVExecuter:
+    def __init__(self, tokenized_rows: list[list[str]], id_column: int):
         self.when_stack = []
         self.until_stack = []
         self.idx = 1
         self.id_to_index = {}
 
-    def enable_go_to(self, tokenized_rows: list[list[str]], id_column: int):
         for index, tokenized_row in enumerate(tokenized_rows):
             self.id_to_index[tokenized_row[id_column]] = index
 
@@ -75,24 +73,22 @@ class CustomTSVParser(BaseTSVParser):
 if __name__ == "__main__":
     file_path = "file.tsv"
 
-    tsv = CustomTSVParser()
-
     with open("file.tsv", encoding="utf-8") as f:
         file_content = f.read()
 
-    rows = tsv.parse(file_content)
+    rows = parse(file_content)
 
     id_col = rows[0].index("ID")
     code_col = rows[0].index("Code")
     name_col = rows[0].index("Name")
     text_col = rows[0].index("EN")
 
-    tsv.enable_go_to(rows, id_col)
-
     print("ID column index:", id_col)
     print("Code column index:", code_col)
     print("Name column index:", name_col)
     print()
+
+    tsv = TSVExecuter(rows, id_col)
 
     while tsv.idx < len(rows):
         row = rows[tsv.idx]
