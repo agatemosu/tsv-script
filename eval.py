@@ -27,6 +27,14 @@ def replace_variables_wrapper(func):
     return wrapper
 
 
+def check_when_stack(func):
+    def wrapper(self, *args):
+        if all(self.when_stack):
+            return func(self, *args)
+
+    return wrapper
+
+
 class TSVExecuter:
     def __init__(self, tokenized_rows: list[list[str]], id_column: int):
         self.when_stack = []
@@ -52,20 +60,15 @@ class TSVExecuter:
         self.when_stack.append(eval(condition))
 
     def endwhen(self):
-        if self.when_stack:
-            self.when_stack.pop()
+        self.when_stack.pop()
 
     # This is like a "do-while" in C
+    @check_when_stack
     def until(self, condition: str):
-        if not all(self.when_stack):
-            return
-
         self.until_stack.append((condition, self.idx))
 
+    @check_when_stack
     def enduntil(self):
-        if not all(self.when_stack):
-            return
-
         condition, index = self.until_stack[-1]
         condition = self._replace_variables(condition)
 
@@ -74,30 +77,24 @@ class TSVExecuter:
         else:
             self.idx = index
 
+    @check_when_stack
     def var(self, name: str, value: str):
-        if not all(self.when_stack):
-            return
-
         if "$" in value:
             value = self._replace_variables(value)
 
         self.variables[name] = eval(value)
 
+    @check_when_stack
     @replace_variables_wrapper
     def log(self, *args):
-        if not all(self.when_stack):
-            return
-
         for arg in args:
             print(arg, end=" ")
 
         print()
 
+    @check_when_stack
     @replace_variables_wrapper
     def chara(self, name: str, action: str = None, position: str = None):
-        if not all(self.when_stack):
-            return
-
         message = f"{name.title()} appears on the screen"
         if action:
             message += f", visibly {action}"
@@ -105,11 +102,9 @@ class TSVExecuter:
             message += f", positioned on the {position} side"
         print(f"{message}.")
 
+    @check_when_stack
     @replace_variables_wrapper
     def go_to(self, line_id: str):
-        if not all(self.when_stack):
-            return
-
         self.idx = self.id_to_index[line_id] - 1
 
 
