@@ -61,7 +61,7 @@ class TSVExecuter:
             message += f", visibly {action}"
         if position:
             message += f", positioned on the {position} side"
-        print(message)
+        print(f"{message}.")
 
     def go_to(self, line_id: str):
         if not all(self.when_stack):
