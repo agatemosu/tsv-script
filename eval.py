@@ -35,6 +35,10 @@ def check_when_stack(func):
     return wrapper
 
 
+def red(text: str) -> str:
+    return "\033[91m" + text + "\033[0m"
+
+
 class TSVExecuter:
     def __init__(self, tokenized_rows: list[list[str]], id_column: int):
         self.when_stack = []
@@ -46,7 +50,7 @@ class TSVExecuter:
         for index, tokenized_row in enumerate(tokenized_rows):
             self.id_to_index[tokenized_row[id_column]] = index
 
-    def _replace_variables(self, argument: str):
+    def _replace_variables(self, argument: str) -> str:
         variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
 
         for variable in variables:
@@ -79,6 +83,9 @@ class TSVExecuter:
 
     @check_when_stack
     def var(self, name: str, value: str):
+        if "$" in name:
+            raise Exception(f"Do not put {red('$')}var on the name.")
+
         if "$" in value:
             value = self._replace_variables(value)
 
