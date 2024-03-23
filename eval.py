@@ -149,7 +149,7 @@ if __name__ == "__main__":
         arguments = function_and_args[1:]
 
         # Check if function exists in tsv object
-        if hasattr(tsv, function_name):
+        if function_name and not function_name.startswith("#"):
             function = getattr(tsv, function_name)
             function(*arguments)
 
