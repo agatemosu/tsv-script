@@ -15,7 +15,7 @@ def parse(tsvfile: str) -> list[list[str]]:
 
 
 def replace_variables_wrapper(func):
-    def wrapper(self, *args):
+    def wrapper(self: "TSVExecutor", *args):
         replaced_args = []
         for arg in args:
             if "$" in arg:
@@ -28,7 +28,7 @@ def replace_variables_wrapper(func):
 
 
 def check_when_stack(func):
-    def wrapper(self, *args):
+    def wrapper(self: "TSVExecutor", *args):
         if all(self.when_stack):
             return func(self, *args)
 
