@@ -116,6 +116,39 @@ class TSVExecuter:
     def go_to(self, line_id: str):
         self.idx = self.id_to_index[line_id] - 1
 
+    def execute(
+        self,
+        rows: list[list[str]],
+        code_col: int,
+        name_col: int,
+        text_col: int,
+    ):
+        while self.idx < len(rows):
+            row = rows[self.idx]
+            code_value = row[code_col]
+
+            # Example of a function:
+            #   func1:arg1:arg2:arg3
+            #   func2:arg1::arg3
+            #   func3:arg1:$var
+            #
+            function_and_args = code_value.split(":")
+            function_name = function_and_args[0].strip()
+            arguments = function_and_args[1:]
+
+            # Check if function exists in tsv object
+            if function_name and not function_name.startswith("#"):
+                function = getattr(self, function_name)
+                function(*arguments)
+
+            if all(self.when_stack):
+                if row[text_col]:
+                    print(row[name_col], "says:", row[text_col])
+
+                time.sleep(0.5)
+
+            self.idx += 1
+
 
 if __name__ == "__main__":
     file_path = "file.tsv"
@@ -136,29 +169,4 @@ if __name__ == "__main__":
     print()
 
     tsv = TSVExecuter(rows, id_col)
-
-    while tsv.idx < len(rows):
-        row = rows[tsv.idx]
-        code_value = row[code_col]
-
-        # Example of a function:
-        #   func1:arg1:arg2:arg3
-        #   func2:arg1::arg3
-        #   func3:arg1:$var
-        #
-        function_and_args = code_value.split(":")
-        function_name = function_and_args[0].strip()
-        arguments = function_and_args[1:]
-
-        # Check if function exists in tsv object
-        if function_name and not function_name.startswith("#"):
-            function = getattr(tsv, function_name)
-            function(*arguments)
-
-        if all(tsv.when_stack):
-            if row[text_col]:
-                print(row[name_col], "says:", row[text_col])
-
-            time.sleep(0.5)
-
-        tsv.idx += 1
+    tsv.execute(rows, code_col, name_col, text_col)
