@@ -39,7 +39,7 @@ def red(text: str) -> str:
     return "\033[91m" + text + "\033[0m"
 
 
-class TSVExecuter:
+class TSVExecutor:
     def __init__(self, tokenized_rows: list[list[str]], id_column: int):
         self.when_stack = []
         self.until_stack = []
@@ -96,10 +96,7 @@ class TSVExecuter:
     @check_when_stack
     @replace_variables_wrapper
     def log(self, *args):
-        for arg in args:
-            print(arg, end=" ")
-
-        print()
+        print(*args)
 
     @check_when_stack
     @replace_variables_wrapper
@@ -127,7 +124,7 @@ class TSVExecuter:
             row = rows[self.idx]
             code_value = row[code_col]
 
-            # Example of a function:
+            # Example of valid functions:
             #   func1:arg1:arg2:arg3
             #   func2:arg1::arg3
             #   func3:arg1:$var
@@ -136,7 +133,7 @@ class TSVExecuter:
             function_name = function_and_args[0].strip()
             arguments = function_and_args[1:]
 
-            # Check if function exists in tsv object
+            # Run the function if it's not a comment
             if function_name and not function_name.startswith("#"):
                 function = getattr(self, function_name)
                 function(*arguments)
@@ -153,20 +150,23 @@ class TSVExecuter:
 if __name__ == "__main__":
     file_path = "file.tsv"
 
-    with open("file.tsv", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         file_content = f.read()
 
-    rows = parse(file_content)
+    rows_list = parse(file_content)
 
-    id_col = rows[0].index("ID")
-    code_col = rows[0].index("Code")
-    name_col = rows[0].index("Name")
-    text_col = rows[0].index("EN")
+    columns = {
+        "id": rows_list[0].index("ID"),
+        "code": rows_list[0].index("Code"),
+        "name": rows_list[0].index("Name"),
+        "text": rows_list[0].index("EN"),
+    }
 
-    print("ID column index:", id_col)
-    print("Code column index:", code_col)
-    print("Name column index:", name_col)
+    print("ID column index:", columns["id"])
+    print("Code column index:", columns["code"])
+    print("Name column index:", columns["name"])
+    print("Text column index:", columns["text"])
     print()
 
-    tsv = TSVExecuter(rows, id_col)
-    tsv.execute(rows, code_col, name_col, text_col)
+    tsv = TSVExecutor(rows_list, columns["id"])
+    tsv.execute(rows_list, columns["code"], columns["name"], columns["text"])
