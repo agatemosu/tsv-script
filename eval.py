@@ -83,8 +83,10 @@ class TSVExecuter:
 
     @check_when_stack
     def var(self, name: str, value: str):
-        if "$" in name:
-            raise Exception(f"Do not put {red('$')}var on the name.")
+        if not re.match(r"^[A-Za-z_]\w*$", name):
+            raise Exception(
+                f"The variable name {red(name)} does not have the correct format."
+            )
 
         if "$" in value:
             value = self._replace_variables(value)
