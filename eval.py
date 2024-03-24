@@ -3,25 +3,17 @@ import re
 import time
 
 
-def parse(tsvfile: str) -> list[list[str]]:
-    reader = csv.reader(tsvfile.splitlines(), delimiter="\t")
+def parse(tsv_file: str) -> list[list[str]]:
+    reader = csv.reader(tsv_file.splitlines(), delimiter="\t")
 
-    tokenized_rows = []
-    for tokenized_row in reader:
-        if any(tokenized_row):
-            tokenized_rows.append(tokenized_row)
-
-    return tokenized_rows
+    return [row for row in reader if any(row)]
 
 
 def replace_variables_wrapper(func):
     def wrapper(self: "TSVExecutor", *args):
-        replaced_args = []
-        for arg in args:
-            if "$" in arg:
-                arg = self._replace_variables(arg)
-            replaced_args.append(arg)
-
+        replaced_args = [
+            self._replace_variables(arg) if "$" in arg else arg for arg in args
+        ]
         return func(self, *replaced_args)
 
     return wrapper
