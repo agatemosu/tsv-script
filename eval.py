@@ -43,6 +43,7 @@ class TSVExecutor:
     def __init__(self, tokenized_rows: list[list[str]], id_column: int):
         self.when_stack = []
         self.until_stack = []
+        self.stack_trace = []
         self.idx = 1
         self.id_to_index = {}
         self.variables = {}
@@ -62,22 +63,36 @@ class TSVExecutor:
     @replace_variables_wrapper
     def when(self, condition: str):
         self.when_stack.append(eval(condition))
+        self.stack_trace.append("when")
 
     def endwhen(self):
+        if self.stack_trace[-1] != "when":
+            raise Exception(
+                f'Expected "end{self.stack_trace[-1]}" on line {self.idx + 1}'
+            )
+
         self.when_stack.pop()
+        self.stack_trace.pop()
 
     # This is like a "do-while" in C
     @check_when_stack
     def until(self, condition: str):
         self.until_stack.append((condition, self.idx))
+        self.stack_trace.append("until")
 
     @check_when_stack
     def enduntil(self):
+        if self.stack_trace[-1] != "until":
+            raise Exception(
+                f'Expected "end{self.stack_trace[-1]}" on line {self.idx + 1}'
+            )
+
         condition, index = self.until_stack[-1]
         condition = self._replace_variables(condition)
 
         if eval(condition):
             self.until_stack.pop()
+            self.stack_trace.pop()
         else:
             self.idx = index
 
@@ -145,6 +160,9 @@ class TSVExecutor:
                 time.sleep(0.5)
 
             self.idx += 1
+
+        if self.stack_trace:
+            raise Exception("Stack trace not ended:", self.stack_trace)
 
 
 if __name__ == "__main__":
