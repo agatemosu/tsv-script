@@ -3,12 +3,6 @@ import re
 import time
 
 
-def parse(tsv_file: str) -> list[list[str]]:
-    reader = csv.reader(tsv_file.splitlines(), delimiter="\t")
-
-    return [row for row in reader if any(row)]
-
-
 def replace_variables_wrapper(func):
     def wrapper(self: "TSVExecutor", *args):
         replaced_args = [
@@ -32,16 +26,37 @@ def red(text: str) -> str:
 
 
 class TSVExecutor:
-    def __init__(self, tokenized_rows: list[list[str]], id_column: int):
+    def __init__(self, file_path: str, lang: str = "EN"):
+        with open(file_path, encoding="utf-8") as f:
+            file_content = f.read()
+
         self.when_stack = []
         self.until_stack = []
         self.stack_trace = []
         self.idx = 1
-        self.id_to_index = {}
         self.variables = {}
+        self.rows = [
+            row
+            for row in csv.reader(file_content.splitlines(), delimiter="\t")
+            if any(row)
+        ]
+        self.columns = {
+            "id": self.rows[0].index("ID"),
+            "code": self.rows[0].index("Code"),
+            "name": self.rows[0].index("Name"),
+            "text": self.rows[0].index(lang),
+        }
+        self.id_to_index = {
+            row[self.columns["id"]]: index for index, row in enumerate(self.rows)
+        }
 
-        for index, tokenized_row in enumerate(tokenized_rows):
-            self.id_to_index[tokenized_row[id_column]] = index
+        print("ID column index:", self.columns["id"])
+        print("Code column index:", self.columns["code"])
+        print("Name column index:", self.columns["name"])
+        print("Text column index:", self.columns["text"])
+        print()
+
+        self._execute()
 
     def _replace_variables(self, argument: str) -> str:
         variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
@@ -120,16 +135,10 @@ class TSVExecutor:
     def go_to(self, line_id: str):
         self.idx = self.id_to_index[line_id] - 1
 
-    def execute(
-        self,
-        rows: list[list[str]],
-        code_col: int,
-        name_col: int,
-        text_col: int,
-    ):
-        while self.idx < len(rows):
-            row = rows[self.idx]
-            code_value = row[code_col]
+    def _execute(self):
+        while self.idx < len(self.rows):
+            row = self.rows[self.idx]
+            code_value = row[self.columns["code"]]
 
             # Example of valid functions:
             #   func1:arg1:arg2:arg3
@@ -146,8 +155,8 @@ class TSVExecutor:
                 function(*arguments)
 
             if all(self.when_stack):
-                if row[text_col]:
-                    print(row[name_col], "says:", row[text_col])
+                if row[self.columns["text"]]:
+                    print(row[self.columns["name"]], "says:", row[self.columns["text"]])
 
                 time.sleep(0.5)
 
@@ -158,25 +167,4 @@ class TSVExecutor:
 
 
 if __name__ == "__main__":
-    file_path = "file.tsv"
-
-    with open(file_path, encoding="utf-8") as f:
-        file_content = f.read()
-
-    rows_list = parse(file_content)
-
-    columns = {
-        "id": rows_list[0].index("ID"),
-        "code": rows_list[0].index("Code"),
-        "name": rows_list[0].index("Name"),
-        "text": rows_list[0].index("EN"),
-    }
-
-    print("ID column index:", columns["id"])
-    print("Code column index:", columns["code"])
-    print("Name column index:", columns["name"])
-    print("Text column index:", columns["text"])
-    print()
-
-    tsv = TSVExecutor(rows_list, columns["id"])
-    tsv.execute(rows_list, columns["code"], columns["name"], columns["text"])
+    tsv = TSVExecutor("file.tsv", "EN")
