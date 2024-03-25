@@ -1,22 +1,23 @@
 import csv
 import re
 import time
+from typing import Callable
 
 
-def replace_variables_wrapper(func):
-    def wrapper(self: "TSVExecutor", *args):
+def replace_variables_wrapper(func: Callable[..., None]) -> Callable[..., None]:
+    def wrapper(self: "TSVExecutor", *args: str):
         replaced_args = [
             self._replace_variables(arg) if "$" in arg else arg for arg in args
         ]
-        return func(self, *replaced_args)
+        func(self, *replaced_args)
 
     return wrapper
 
 
-def check_when_stack(func):
-    def wrapper(self: "TSVExecutor", *args):
+def check_when_stack(func: Callable[..., None]) -> Callable[..., None]:
+    def wrapper(self: "TSVExecutor", *args: str):
         if all(self.when_stack):
-            return func(self, *args)
+            func(self, *args)
 
     return wrapper
 
@@ -147,7 +148,7 @@ class TSVExecutor:
 
     @check_when_stack
     @replace_variables_wrapper
-    def log(self, *args):
+    def log(self, *args: str):
         print(*args)
 
     @check_when_stack
