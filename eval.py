@@ -58,6 +58,36 @@ class TSVExecutor:
 
         self._execute()
 
+    def _execute(self):
+        while self.idx < len(self.rows):
+            row = self.rows[self.idx]
+            code_value = row[self.columns["code"]]
+
+            # Example of valid functions:
+            #   func1:arg1:arg2:arg3
+            #   func2:arg1::arg3
+            #   func3:arg1:$var
+            #
+            function_and_args = code_value.split(":")
+            function_name = function_and_args[0].strip()
+            arguments = function_and_args[1:]
+
+            # Run the function if it's not a comment
+            if function_name and not function_name.startswith("#"):
+                function = getattr(self, function_name)
+                function(*arguments)
+
+            if all(self.when_stack):
+                if row[self.columns["text"]]:
+                    print(row[self.columns["name"]], "says:", row[self.columns["text"]])
+
+                time.sleep(0.5)
+
+            self.idx += 1
+
+        if self.stack_trace:
+            raise Exception("Stack trace not ended:", self.stack_trace)
+
     def _replace_variables(self, argument: str) -> str:
         variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
 
@@ -134,36 +164,6 @@ class TSVExecutor:
     @replace_variables_wrapper
     def go_to(self, line_id: str):
         self.idx = self.id_to_index[line_id] - 1
-
-    def _execute(self):
-        while self.idx < len(self.rows):
-            row = self.rows[self.idx]
-            code_value = row[self.columns["code"]]
-
-            # Example of valid functions:
-            #   func1:arg1:arg2:arg3
-            #   func2:arg1::arg3
-            #   func3:arg1:$var
-            #
-            function_and_args = code_value.split(":")
-            function_name = function_and_args[0].strip()
-            arguments = function_and_args[1:]
-
-            # Run the function if it's not a comment
-            if function_name and not function_name.startswith("#"):
-                function = getattr(self, function_name)
-                function(*arguments)
-
-            if all(self.when_stack):
-                if row[self.columns["text"]]:
-                    print(row[self.columns["name"]], "says:", row[self.columns["text"]])
-
-                time.sleep(0.5)
-
-            self.idx += 1
-
-        if self.stack_trace:
-            raise Exception("Stack trace not ended:", self.stack_trace)
 
 
 if __name__ == "__main__":
