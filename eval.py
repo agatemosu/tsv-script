@@ -103,7 +103,7 @@ class TSVExecutor:
             self.idx += 1
 
         if self.stack_trace:
-            raise Exception("Stack trace not ended:", self.stack_trace)
+            raise Exception(f"Stack trace not ended: {self.stack_trace}.")
 
     def _replace_variables(self, argument: str) -> str:
         variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
@@ -122,7 +122,7 @@ class TSVExecutor:
     def endwhen(self):
         if self.stack_trace[-1] != "when":
             raise Exception(
-                f'Expected "end{self.stack_trace[-1]}" on line {self.idx + 1}'
+                f'Expected "end{self.stack_trace[-1]}" on line {self.idx + 1}.'
             )
 
         self.when_stack.pop()
@@ -138,7 +138,7 @@ class TSVExecutor:
     def enduntil(self):
         if self.stack_trace[-1] != "until":
             raise Exception(
-                f'Expected "end{self.stack_trace[-1]}" on line {self.idx + 1}'
+                f'Expected "end{self.stack_trace[-1]}" on line {self.idx + 1}.'
             )
 
         condition, index = self.until_stack[-1]
