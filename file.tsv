@@ -1,34 +1,34 @@
 ID	Code	Name	EN
-	log:The history started		
+	"log ""The history started"""		
 			
-	var:es:1		
-	until:self.idx<$es		
+	var es=1		
+	until self.idx<$es		
 		Narrator	Here in the class...
 	# Comment		
-	var:es:$es + 4		
-	"log:Variable ""es"" is:$es"		
+	var es=$es+4		
+	"log 'Variable ""es"" is' $es"		
 	enduntil		
 			
-	when:True		
-	chara:nikola:angry		
+	when True		
+	chara nikola angry		
 		Nikola	Hello Roger
 	endwhen		
 			
-	when:False		
-roger_in	chara:roger		
+	when False		
+roger_in	chara roger		
 		Roger	Hello Nikola
-	go_to:alva_in		
+	go_to alva_in		
 	endwhen		
 			
-	go_to:roger_in		
+	go_to roger_in		
 			
-alva_in	chara:alva::left		
+alva_in	chara alva position=left		
 		Alva	Hello Roger and Nikola
 			
-	when:False		
-	until:True		
+	when False		
+	until True		
 		Narrator	They are all on the class
 	enduntil		
 	endwhen		
 		Narrator	One hour later, they left
-	log:The history ended		
+	"log ""The history ended"""		

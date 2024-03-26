@@ -1,25 +1,43 @@
 import csv
 import re
+import shlex
 import time
 from typing import Callable
 
 
 def replace_variables_wrapper(func: Callable[..., None]) -> Callable[..., None]:
-    def wrapper(self: "TSVExecutor", *args: str):
+    def wrapper(self: "TSVExecutor", *args: str, **kwargs: str):
         replaced_args = [
             self._replace_variables(arg) if "$" in arg else arg for arg in args
         ]
-        func(self, *replaced_args)
+        func(self, *replaced_args, **kwargs)
 
     return wrapper
 
 
 def check_when_stack(func: Callable[..., None]) -> Callable[..., None]:
-    def wrapper(self: "TSVExecutor", *args: str):
+    def wrapper(self: "TSVExecutor", *args: str, **kwargs: str):
         if all(self.when_stack):
-            func(self, *args)
+            func(self, *args, **kwargs)
 
     return wrapper
+
+
+def parse_command(input: str) -> tuple[str, list[str], dict[str, str]]:
+    tokens = shlex.split(input)
+
+    command = tokens[0]
+    args = []
+    kwargs = {}
+
+    for token in tokens[1:]:
+        if "=" in token:
+            key, value = token.split("=", 1)
+            kwargs[key] = value
+        else:
+            args.append(token)
+
+    return command, args, kwargs
 
 
 def red(text: str) -> str:
@@ -65,18 +83,16 @@ class TSVExecutor:
             code_value = row[self.columns["code"]]
 
             # Example of valid functions:
-            #   func1:arg1:arg2:arg3
-            #   func2:arg1::arg3
-            #   func3:arg1:$var
+            #   func1 arg1 arg2 arg3
+            #   func2 arg1 param3=arg3
+            #   func3 $arg1 $arg2
             #
-            function_and_args = code_value.split(":")
-            function_name = function_and_args[0].strip()
-            arguments = function_and_args[1:]
-
             # Run the function if it's not a comment
-            if function_name and not function_name.startswith("#"):
+            if code_value and not code_value.startswith("#"):
+                function_name, args, kwargs = parse_command(code_value)
+
                 function = getattr(self, function_name)
-                function(*arguments)
+                function(*args, **kwargs)
 
             if all(self.when_stack):
                 if row[self.columns["text"]]:
@@ -135,7 +151,9 @@ class TSVExecutor:
             self.idx = index
 
     @check_when_stack
-    def var(self, name: str, value: str):
+    def var(self, **kwargs: str):
+        name, value = kwargs.popitem()
+
         if not re.match(r"^[A-Za-z_]\w*$", name):
             raise Exception(
                 f"The variable name {red(name)} does not have the correct format."
