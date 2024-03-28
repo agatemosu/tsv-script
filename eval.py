@@ -4,6 +4,9 @@ import shlex
 import time
 from typing import Callable
 
+PATTERN_VARIABLE_CATCH = re.compile(r"\$([A-Za-z_]\w*)")
+PATTERN_VARIABLE = re.compile(r"^[A-Za-z_]\w*$")
+
 
 def replace_variables_wrapper(func: Callable[..., None]) -> Callable[..., None]:
     def wrapper(self: "TSVExecutor", *args: str, **kwargs: str):
@@ -23,8 +26,8 @@ def check_when_stack(func: Callable[..., None]) -> Callable[..., None]:
     return wrapper
 
 
-def parse_command(input: str) -> tuple[str, list[str], dict[str, str]]:
-    tokens = shlex.split(input)
+def parse_command(input_text: str) -> tuple[str, list[str], dict[str, str]]:
+    tokens = shlex.split(input_text)
 
     command = tokens[0]
     args = []
@@ -47,18 +50,13 @@ def red(text: str) -> str:
 class TSVExecutor:
     def __init__(self, file_path: str, lang: str = "EN"):
         with open(file_path, encoding="utf-8") as f:
-            file_content = f.read()
+            self.rows = [row for row in csv.reader(f, delimiter="\t") if any(row)]
 
         self.when_stack = []
         self.until_stack = []
         self.stack_trace = []
         self.idx = 1
         self.variables = {}
-        self.rows = [
-            row
-            for row in csv.reader(file_content.splitlines(), delimiter="\t")
-            if any(row)
-        ]
         self.columns = {
             "id": self.rows[0].index("ID"),
             "code": self.rows[0].index("Code"),
@@ -106,12 +104,9 @@ class TSVExecutor:
             raise Exception(f"Stack trace not ended: {', '.join(self.stack_trace)}.")
 
     def _replace_variables(self, argument: str) -> str:
-        variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
-
-        for variable in variables:
-            argument = argument.replace(f"${variable}", str(self.variables[variable]))
-
-        return argument
+        return PATTERN_VARIABLE_CATCH.sub(
+            lambda match: str(self.variables[match.group(1)]), argument
+        )
 
     # This is like an "if" in Python
     @replace_variables_wrapper
@@ -154,7 +149,7 @@ class TSVExecutor:
     def var(self, **kwargs: str):
         name, value = kwargs.popitem()
 
-        if not re.match(r"^[A-Za-z_]\w*$", name):
+        if not PATTERN_VARIABLE.match(name):
             raise Exception(
                 f"The variable name {red(name)} does not have the correct format."
             )
