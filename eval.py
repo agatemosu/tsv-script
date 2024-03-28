@@ -13,7 +13,11 @@ def replace_variables_wrapper(func: Callable[..., None]) -> Callable[..., None]:
         replaced_args = [
             self._replace_variables(arg) if "$" in arg else arg for arg in args
         ]
-        func(self, *replaced_args, **kwargs)
+        replaced_kwargs = {
+            key: self._replace_variables(value) if "$" in value else value
+            for key, value in kwargs.items()
+        }
+        func(self, *replaced_args, **replaced_kwargs)
 
     return wrapper
 
