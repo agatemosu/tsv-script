@@ -41,7 +41,7 @@ def parse_command(input: str) -> tuple[str, list[str], dict[str, str]]:
 
 
 def red(text: str) -> str:
-    return "\033[91m" + text + "\033[0m"
+    return "".join(["\033[91m", text, "\033[0m"])
 
 
 class TSVExecutor:
@@ -103,7 +103,7 @@ class TSVExecutor:
             self.idx += 1
 
         if self.stack_trace:
-            raise Exception(f"Stack trace not ended: {self.stack_trace}.")
+            raise Exception(f"Stack trace not ended: {', '.join(self.stack_trace)}.")
 
     def _replace_variables(self, argument: str) -> str:
         variables = re.findall(r"\$([A-Za-z_]\w*)", argument)
